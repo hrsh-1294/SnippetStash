@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { addToSnippets, updateToSnippets } from "../redux/SnippetSlice";
 
@@ -10,6 +10,18 @@ const Home = () => {
   const snippetId = searchParams.get("snippetId");
 
   const dispatch = useDispatch();
+  const allSnippets = useSelector((state)=> state.snippet.snippets);
+
+  useEffect(() => {
+    if(snippetId){
+      const snippet = allSnippets.find((s)=> s._id === snippetId);
+      setTitle(snippet.title)
+      setValue(snippet.content)
+    }
+  
+  }, [snippetId])
+
+
   function createSnippet() {
     const snippet = {
       title: title,

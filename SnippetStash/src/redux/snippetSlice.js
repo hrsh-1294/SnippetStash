@@ -13,7 +13,14 @@ export const snippetSlice = createSlice({
   reducers: {
     addToSnippets: (state, action) => {
       const snippet = action.payload;
-      //add a check -> snippet already exist case
+
+      // Check if title or content is empty
+      if (!snippet.title || !snippet.content) {
+        toast.error("Title and content cannot be empty!");
+        return; // Don't proceed if validation fails
+      }
+
+      // Check if snippet already exists
       const exists = state.snippets.some(
         (existingSnippet) => existingSnippet.title === snippet.title
       );
@@ -21,52 +28,37 @@ export const snippetSlice = createSlice({
       if (exists) {
         // Notify the user that the snippet already exists
         toast.error("Snippet already exists!");
-      }
-      else {
+      } else {
         state.snippets.push(snippet);
         localStorage.setItem("snippets", JSON.stringify(state.snippets));
-        toast.success("Snippet Created Succesfully!")
+        toast.success("Snippet Created Successfully!");
       }
-
     },
     updateToSnippets: (state, action) => {
-      const snippet = action.payload
-      const index = state.snippets.findIndex((items) => items._id === snippet._id)
+      const snippet = action.payload;
+      const index = state.snippets.findIndex((items) => items._id === snippet._id);
 
       if (index >= 0) {
-        state.snippets[index] = snippet
-        localStorage.setItem("snippets", JSON.stringify(state.snippets))
-
-        toast.success("Snippet Updated!")
-
+        state.snippets[index] = snippet;
+        localStorage.setItem("snippets", JSON.stringify(state.snippets));
+        toast.success("Snippet Updated!");
       }
-
-
-
     },
     resetAllSnippets: (state, action) => {
-      prompt("Do you want to reset all Snippets?")
-      state.snippets = []
-
-      localStorage.removeItem("snippets")
-      toast.success("Snippets Removed!")
+      prompt("Do you want to reset all Snippets?");
+      state.snippets = [];
+      localStorage.removeItem("snippets");
+      toast.success("Snippets Removed!");
     },
-
     removeFromSnippets: (state, action) => {
-      const snippetId = action.payload
-
-      console.log(snippetId);
-      const index = state.snippets.findIndex((items) => items._id === snippetId)
+      const snippetId = action.payload;
+      const index = state.snippets.findIndex((items) => items._id === snippetId);
 
       if (index >= 0) {
-        state.snippets.splice(index,1);
+        state.snippets.splice(index, 1);
         localStorage.setItem("snippets", JSON.stringify(state.snippets));
-
-        toast.success("Paste Deleted!")
+        toast.success("Snippet Deleted!");
       }
-      
-
-
     },
   },
 })
