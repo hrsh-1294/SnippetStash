@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useSearchParams } from "react-router-dom";
-import { addToSnippets, updateToSnippets } from "../redux/SnippetSlice";
+import { addToSnippets, updateToSnippets } from "../redux/snippetSlice.js";
 
 const ViewSnippet = () => {
 
