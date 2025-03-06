@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { removeFromSnippets } from "../redux/SnippetSlice";
+import { removeFromSnippets } from "../redux/snippetSlice.js";
 import toast from "react-hot-toast";
 import {
   FacebookShareButton,
