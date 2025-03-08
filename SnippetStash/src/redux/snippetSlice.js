@@ -57,7 +57,7 @@ export const snippetSlice = createSlice({
       if (index >= 0) {
         state.snippets.splice(index, 1);
         localStorage.setItem("snippets", JSON.stringify(state.snippets));
-        toast.success("Snippet Deleted!");
+        
       }
     },
   },
