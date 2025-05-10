@@ -57,44 +57,43 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-900 text-gray-200 pt-4 pb-8 px-4">
-
-      <div className="container mx-auto w-full max-w-full lg:max-w-7xl xl:max-w-full 2xl:max-w-full px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center md:text-left">
-          <h1 className="text-3xl font-bold text-white mb-2">
+    <div className="w-full min-h-screen bg-gray-900 text-gray-200 py-4 sm:py-6 md:py-8 px-3 sm:px-4 md:px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-4 sm:mb-6 md:mb-8 text-center md:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">
             {snippetId ? "Update Snippet" : "Create New Snippet"}
           </h1>
-          <p className="text-gray-400">
+          <p className="text-gray-400 text-sm sm:text-base">
             {snippetId
               ? "Update your existing snippet below"
               : "Create and save your code snippets"}
           </p>
         </div>
         
-        <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-6 border border-gray-700">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="md:col-span-3">
+        <div className="bg-gray-800 rounded-lg sm:rounded-xl md:rounded-2xl shadow-xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 border border-gray-700">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="w-full">
               <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">
                 Title
               </label>
-              <input
-                id="title"
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none text-white"
-                type="text"
-                placeholder="Enter title here"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                }}
-              />
-            </div>
-            <div className="flex items-end">
-              <button
-                onClick={createSnippet}
-                className="w-full px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all shadow-lg"
-              >
-                {snippetId ? "Update Snippet" : "Create Snippet"}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <input
+                  id="title"
+                  className="w-full flex-grow px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none text-white text-sm sm:text-base"
+                  type="text"
+                  placeholder="Enter title here"
+                  value={title}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                  }}
+                />
+                <button
+                  onClick={createSnippet}
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition-all shadow-lg text-sm sm:text-base whitespace-nowrap"
+                >
+                  {snippetId ? "Update Snippet" : "Create Snippet"}
+                </button>
+              </div>
             </div>
           </div>
           
@@ -105,7 +104,7 @@ const Home = () => {
               </label>
               <button 
                 onClick={copyToClipboard}
-                className={`flex items-center space-x-1 px-3 py-1 rounded-md transition-all ${
+                className={`flex items-center space-x-1 px-2 sm:px-3 py-1 rounded-md transition-all ${
                   copySuccess 
                     ? "bg-green-600 text-white" 
                     : "bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white"
@@ -114,7 +113,7 @@ const Home = () => {
               >
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
-                  className="h-4 w-4" 
+                  className="h-3 w-3 sm:h-4 sm:w-4" 
                   fill="none" 
                   viewBox="0 0 24 24" 
                   stroke="currentColor"
@@ -142,18 +141,19 @@ const Home = () => {
             </div>
             <textarea
               id="content"
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none font-mono text-sm text-white"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none font-mono text-xs sm:text-sm text-white"
               value={value}
               placeholder="Enter content here..."
               onChange={(e) => {
                 setValue(e.target.value);
               }}
-              rows={20}
+              rows={12}
+              style={{ minHeight: "200px" }}
             />
           </div>
         </div>
         
-        <div className="text-sm text-gray-500 text-center">
+        <div className="text-xs sm:text-sm text-gray-500 text-center px-2">
           All snippets are saved automatically to your local storage
         </div>
       </div>
