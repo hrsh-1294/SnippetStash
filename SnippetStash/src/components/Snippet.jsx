@@ -86,7 +86,7 @@ const Snippet = () => {
             
             <div className="flex flex-wrap justify-center gap-6">
           {filteredData.map((snippet) => {
-              const shareUrl = `https://snippet-stash-eq4f.vercel.app/snippet/${snippet._id}`;
+              const shareUrl = `https://snippet-stash-eq4f.vercel.app/snippets/${snippet._id}`;
               const shareTitle = snippet.title;
 
               return (
