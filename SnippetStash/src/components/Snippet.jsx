@@ -184,19 +184,19 @@ const Snippet = () => {
             <h3 className="text-xl font-bold text-white mb-4 text-center">Share Snippet</h3>
             
             <div className="flex justify-center space-x-4 mb-6">
-              <FacebookShareButton url={`https://snippet-stash-eq4f.vercel.app/snippet/${activeSnippetId}`} quote={filteredData.find(s => s._id === activeSnippetId)?.title}>
+              <FacebookShareButton url={`https://snippet-stash-eq4f.vercel.app/snippets/${activeSnippetId}`} quote={filteredData.find(s => s._id === activeSnippetId)?.title}>
                 <FacebookIcon size={45} round={true} />
               </FacebookShareButton>
 
-              <TwitterShareButton url={`https://snippet-stash-eq4f.vercel.app/snippet/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
+              <TwitterShareButton url={`https://snippet-stash-eq4f.vercel.app/snippets/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
                 <TwitterIcon size={45} round={true} />
               </TwitterShareButton>
 
-              <WhatsappShareButton url={`https://snippet-stash-eq4f.vercel.app/snippet/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
+              <WhatsappShareButton url={`https://snippet-stash-eq4f.vercel.app/snippets/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
                 <WhatsappIcon size={45} round={true} />
               </WhatsappShareButton>
 
-              <LinkedinShareButton url={`https://snippet-stash-eq4f.vercel.app/snippet/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
+              <LinkedinShareButton url={`https://snippet-stash-eq4f.vercel.app/snippets/${activeSnippetId}`} title={filteredData.find(s => s._id === activeSnippetId)?.title}>
                 <LinkedinIcon size={45} round={true} />
               </LinkedinShareButton>
             </div>
