@@ -63,7 +63,7 @@ Check out the live version of SnippetStash here:
 * **Styling**: CSS
 * **State Management**: React Hooks
 * **Redux Toolkit** – React bindings for Redux
-* Vercel - Deployment
+* **Vercel** - Deployment
 
 *Note: Update this section based on the actual technologies used in your project.*
 
