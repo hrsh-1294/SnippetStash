@@ -22,7 +22,8 @@ const Snippet = () => {
   const dispatch = useDispatch();
 
   const filteredData = snippets.filter((snippet) =>
-    snippet.title.toLowerCase().includes(searchTerm.toLowerCase())
+    snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    snippet.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   function handleDelete(snippetId) {
