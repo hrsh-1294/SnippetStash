@@ -3,9 +3,9 @@ import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-gray-800 shadow-lg py-4 px-6 sticky top-0 z-10">
-      <div className="w-full max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg xl:max-w-screen-xl 2xl:max-w-full mx-auto">
-        <div className="flex items-center justify-between">
+    <nav className="bg-gray-800 shadow-lg py-3 sm:py-4 px-3 sm:px-4 md:px-6 sticky top-0 z-10">
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
           {/* Logo Area */}
           <div className="flex items-center">
             <div className="bg-purple-600 text-white p-2 rounded-lg shadow-lg mr-2">
@@ -15,9 +15,9 @@ const Navbar = () => {
             </div>
             <span className="text-xl font-bold text-white">SnippetStash</span>
           </div>
-          
+
           {/* Navigation Links */}
-          <div className="flex space-x-6">
+          <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">
             <NavLink 
               to="/" 
               className={({ isActive }) => 
@@ -39,7 +39,7 @@ const Navbar = () => {
               className={({ isActive }) => 
                 `flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
                   isActive 
-                    ? 'bg-purple-600 text-white  hover:text-white' 
+                    ? 'bg-purple-600 text-white hover:text-white' 
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`
               }
