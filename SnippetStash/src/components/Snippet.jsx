@@ -68,7 +68,7 @@ const Snippet = () => {
             <input
               className="block w-full pl-8 sm:pl-10 pr-2 sm:pr-4 py-1.5 sm:py-2 md:py-3 text-sm sm:text-base bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none text-white"
               type="search"
-              placeholder="Search snippets by title..."
+              placeholder="Search snippets by title/content..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
