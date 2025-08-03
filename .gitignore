@@ -29,3 +29,9 @@ dist-ssr
 .crash
 *.log
 *.tfplan
+
+*.pem
+*.key
+snippetstash-key.pem
+snippetstash-key.pub
+
