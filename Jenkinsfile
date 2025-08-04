@@ -19,9 +19,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-        dir('SnippetStash') {
           sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
-        }
       }
     }
 
