@@ -13,7 +13,7 @@ pipeline {
   stages {
     stage('Clone GitHub Repo') {
       steps {
-        git 'https://github.com/hrsh-1294/SnippetStash.git'
+        git branch: 'main', url: 'https://github.com/hrsh-1294/SnippetStash.git'
       }
     }
 
