@@ -19,7 +19,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-          sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
+          sh 'sudo docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
       }
     }
 
@@ -27,8 +27,8 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
-            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
+            echo "$DOCKER_PASS" | sudo docker login -u "$DOCKER_USER" --password-stdin
+            sudo docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
           '''
         }
       }
@@ -64,9 +64,9 @@ pipeline {
         sshagent(['ec2-ssh-key']) {
           sh """
             ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} '
-              docker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} &&
-              docker rm -f ${CONTAINER_NAME} || true &&
-              docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+              sudo docker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} &&
+              sudo docker rm -f ${CONTAINER_NAME} || true &&
+              sudo docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
             '
           """
         }
