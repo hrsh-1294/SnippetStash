@@ -123,7 +123,10 @@ resource "aws_instance" "jenkins" {
               sudo apt-get update
               sudo apt-get install jenkins -y
               sudo usermod -aG docker jenkins
+              
+              sudo systemctl restart docker
               sudo systemctl restart jenkins
+
 
               sudo systemctl status jenkins
               sudo systemctl enable jenkins
