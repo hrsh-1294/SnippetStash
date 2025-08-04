@@ -110,8 +110,6 @@ Contributions are welcome! Please follow these steps:
 * [React](https://reactjs.org/)
 * [Create React App](https://create-react-app.dev/)
 
-*Note: Add any other libraries or resources you used.*
 
 ---
 
-Feel free to customize this `README.md` to better fit the specifics of your project. Let me know if you need assistance with anything else!
