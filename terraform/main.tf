@@ -1,7 +1,6 @@
 provider "aws" {
-  region = "ap-south-1"
+  region = var.region
 }
-
 
 resource "aws_key_pair" "snippet_key" {
   key_name   = "snippetstash-key"
@@ -12,7 +11,7 @@ resource "aws_key_pair" "snippet_key" {
 resource "aws_security_group" "snippet_sg" {
   name        = "snippetstash-sg"
   description = "Allow SSH, HTTP, and Jenkins"
-  
+
   ingress {
     from_port   = 22
     to_port     = 22
@@ -59,6 +58,74 @@ resource "aws_instance" "snippetstash_server" {
   user_data = file("script.sh")
 
   tags = {
-    Name = "snippetstash-jenkins-server"
+    Name = "snippetstash-server"
   }
 }
+
+resource "aws_security_group" "jenkins_sg" {
+  name        = "jenkins-sg"
+  description = "Allow SSH and Jenkins ports"
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Jenkins UI"
+    from_port   = var.jenkins_port
+    to_port     = var.jenkins_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTP (optional)"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+resource "aws_instance" "jenkins" {
+  ami                    = var.ami_id
+  instance_type          = var.jenkins_instance_type
+  key_name               = aws_key_pair.snippet_key.key_name
+  vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+    user_data = <<-EOF
+              #!/bin/bash
+              sudo apt update -y
+              sudo apt install -y docker.io
+              sudo systemctl start docker
+              sudo systemctl enable docker
+              sudo usermod -aG docker ubuntu
+
+              curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo tee \
+                /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+              echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
+                https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+                /etc/apt/sources.list.d/jenkins.list > /dev/null
+
+              sudo apt update -y
+              sudo apt install -y openjdk-11-jdk jenkins
+
+              sudo systemctl start jenkins
+              sudo systemctl enable jenkins
+              sudo reboot
+              EOF
+
+}
+
+

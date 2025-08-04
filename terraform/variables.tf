@@ -13,3 +13,12 @@ variable "ami_id" {
   default     = "ami-0f918f7e67a3323f0" # Ubuntu 22.04 for ap-south-1
   type        = string
 }
+
+variable "jenkins_port" {
+  default = 8080
+}
+
+variable "jenkins_instance_type" {
+  default = "t3.micro"
+  type    = string
+}
