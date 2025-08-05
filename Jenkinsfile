@@ -19,7 +19,7 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-          bat 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
+        bat 'docker build -t %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% .'
       }
     }
 
@@ -27,8 +27,8 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           bat '''
-            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-            docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
+            echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+            docker push %DOCKER_USER%/%IMAGE_NAME%:%IMAGE_TAG%
           '''
         }
       }
@@ -63,11 +63,10 @@ pipeline {
       steps {
         sshagent(['ec2-ssh-key']) {
           bat """
-            ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} '
-              ddocker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} &&
-              docker rm -f ${CONTAINER_NAME} || true &&
-              docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-            '
+            ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} ^
+              "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
+              docker rm -f %CONTAINER_NAME% || exit 0 && ^
+              docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
           """
         }
       }
