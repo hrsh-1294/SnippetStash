@@ -36,7 +36,7 @@ pipeline {
 
     stage('Provision Infrastructure with Terraform') {
       steps {
-        dir('SnippetStash/terraform') {
+        dir('terraform') {
           bat '''
             terraform init
             terraform apply -auto-approve
@@ -47,7 +47,7 @@ pipeline {
 
     stage('Fetch EC2 IP') {
       steps {
-        dir('/terraform') {
+        dir('terraform') {
           script {
             env.EC2_IP = bat(
               script: "terraform output -raw ec2_ip",
