@@ -63,19 +63,16 @@ pipeline {
 
     stage('Deploy App on EC2') {
       steps {
-        dir('terraform') {
-          withCredentials([file(credentialsId: 'snippetstash-key', variable: 'PEM_FILE')]) {
-            script {
-              def sshCommand = """
-                ssh -o StrictHostKeyChecking=no -i "%PEM_FILE%" ubuntu@${env.EC2_DNS} ^
-                "docker pull harshvashishth/snippetstash:latest && ^
-                docker rm -f snippetstash_container || true && ^
-                docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
-              """.stripIndent().trim()
+        withCredentials([file(credentialsId: 'snippetstash-key', variable: 'PEM_FILE')]) {
+          script {
+            def dns = env.EC2_DNS
+            def pem = env.PEM_FILE.replace('\\', '/') // Windows to Unix style
+            def sshCommand = """
+              ssh -o StrictHostKeyChecking=no -i "${pem}" ubuntu@${dns} "docker pull harshvashishth/snippetstash:latest && docker rm -f snippetstash_container || true && docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
+            """
 
-              echo "Running SSH command on EC2 instance..."
-              bat sshCommand
-            }
+            echo "Running SSH command to deploy on EC2..."
+            bat label: 'SSH to EC2', script: sshCommand
           }
         }
       }
@@ -93,7 +90,7 @@ pipeline {
       echo 'Pipeline completed successfully!'
     }
     failure {
-      echo 'Pipeline failed. Please check the logs.'
+      echo 'Pipeline failed. Check above logs.'
     }
   }
 }
