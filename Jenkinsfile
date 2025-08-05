@@ -59,17 +59,31 @@ pipeline {
     }
 
     stage('Deploy App on EC2') {
-  steps {
-    script {
-      bat """
-        ssh -o StrictHostKeyChecking=no -i C:/Users/harsh/OneDrive/Desktop/SnippetStash/terraform/snippetstash-key.pem ec2-user@%EC2_IP% ^
-        "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
-         docker rm -f %CONTAINER_NAME% || exit 0 && ^
-         docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
-      """
+      steps {
+        dir('terraform') {
+          script {
+            // Extract public IP to file
+            bat 'terraform output -raw public_ip > ec2_ip.txt'
+
+            // Read public IP into a variable
+            def ec2Ip = readFile('ec2_ip.txt').trim()
+
+            // Log it for debugging
+            echo "Deploying to EC2 at IP: ${ec2Ip}"
+
+            // Now SSH into EC2 and deploy
+            bat """
+              ssh -o StrictHostKeyChecking=no -i "C:/Users/harsh/OneDrive/Desktop/SnippetStash/terraform/snippetstash-key.pem" ec2-user@${ec2Ip} ^
+              "docker pull harshvashishth/snippetstash:latest && ^
+               docker rm -f snippetstash_container || true && ^
+               docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
+            """
+          }
+        }
+        
+      }
     }
-  }
-}
+
 
 
     stage('App URL') {
