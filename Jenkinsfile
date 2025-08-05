@@ -65,18 +65,17 @@ pipeline {
       steps {
         dir('terraform') {
           withCredentials([file(credentialsId: 'snippetstash-key', variable: 'PEM_FILE')]) {
-            powershell '''
-              $dns = "${env.EC2_DNS}"
-              $pemPath = "${PEM_FILE}"
-              
-              Write-Host "Using PEM file at $pemPath"
-              Write-Host "Deploying to $dns"
+            script {
+              def sshCommand = """
+                ssh -o StrictHostKeyChecking=no -i "%PEM_FILE%" ubuntu@${env.EC2_DNS} ^
+                "docker pull harshvashishth/snippetstash:latest && ^
+                docker rm -f snippetstash_container || true && ^
+                docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
+              """.stripIndent().trim()
 
-              ssh -o StrictHostKeyChecking=no -i "$pemPath" ubuntu@$dns `
-              "docker pull harshvashishth/snippetstash:latest && `
-               docker rm -f snippetstash_container || true && `
-               docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
-            '''
+              echo "Running SSH command on EC2 instance..."
+              bat sshCommand
+            }
           }
         }
       }
