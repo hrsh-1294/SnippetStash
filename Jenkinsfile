@@ -19,14 +19,14 @@ pipeline {
 
     stage('Build Docker Image') {
       steps {
-          sh 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
+          bat 'docker build -t $DOCKERHUB_USER/$IMAGE_NAME:$IMAGE_TAG .'
       }
     }
 
     stage('Push to Docker Hub') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
+          bat '''
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             docker push $DOCKER_USER/$IMAGE_NAME:$IMAGE_TAG
           '''
@@ -37,7 +37,7 @@ pipeline {
     stage('Provision Infrastructure with Terraform') {
       steps {
         dir('SnippetStash/terraform') {
-          sh '''
+          bat '''
             terraform init
             terraform apply -auto-approve
           '''
@@ -49,7 +49,7 @@ pipeline {
       steps {
         dir('SnippetStash/terraform') {
           script {
-            env.EC2_IP = sh(
+            env.EC2_IP = bat(
               script: "terraform output -raw ec2_ip",
               returnStdout: true
             ).trim()
@@ -62,7 +62,7 @@ pipeline {
     stage('Deploy App on EC2') {
       steps {
         sshagent(['ec2-ssh-key']) {
-          sh """
+          bat """
             ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} '
               ddocker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} &&
               docker rm -f ${CONTAINER_NAME} || true &&
