@@ -36,7 +36,7 @@ pipeline {
 
     stage('Provision Infrastructure with Terraform') {
       steps {
-        dir('SnippetStash/terraform') {
+        dir('terraform') {
           sh '''
             terraform init
             terraform apply -auto-approve
@@ -47,13 +47,17 @@ pipeline {
 
     stage('Fetch EC2 IP') {
       steps {
-        dir('SnippetStash/terraform') {
+        dir('terraform') {
           script {
             env.EC2_IP = sh(
-              script: "terraform output -raw ec2_ip",
+              script: "terraform output -raw public_ip",
               returnStdout: true
             ).trim()
-            echo "EC2 IP fetched: ${env.EC2_IP}"
+            env.EC2_DNS = sh(
+              script: "terraform output -raw public_dns",
+              returnStdout: true
+            ).trim()
+            echo "EC2 DNS fetched: ${env.EC2_DNS}"
           }
         }
       }
@@ -61,15 +65,18 @@ pipeline {
 
     stage('Deploy App on EC2') {
       steps {
-        sshagent(['ec2-ssh-key']) {
+        dir('terraform'){
+          sshagent(['ec2-ssh-key']) {
           sh """
-            ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} '
+            ssh -o StrictHostKeyChecking=no ubuntu@${env.EC2_DNS} '
               ddocker pull ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} &&
               docker rm -f ${CONTAINER_NAME} || true &&
               docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
             '
-          """
+            """
+          }
         }
+        
       }
     }
 
