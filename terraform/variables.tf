@@ -19,6 +19,6 @@ variable "jenkins_port" {
 }
 
 variable "jenkins_instance_type" {
-  default = "t2.medium"
+  default = "t3.micro"
   type    = string
 }
