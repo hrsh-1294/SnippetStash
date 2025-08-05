@@ -59,17 +59,18 @@ pipeline {
     }
 
     stage('Deploy App on EC2') {
-      steps {
-        sshagent(['ec2-ssh-key']) {
-          bat """
-            ssh -o StrictHostKeyChecking=no ec2-user@%EC2_IP% ^
-            "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
-            docker rm -f %CONTAINER_NAME% || exit 0 && ^
-            docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
-          """
-        }
-      }
+  steps {
+    script {
+      bat """
+        ssh -o StrictHostKeyChecking=no -i C:/Users/harsh/OneDrive/Desktop/SnippetStash/terraform ec2-user@%EC2_IP% ^
+        "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
+         docker rm -f %CONTAINER_NAME% || exit 0 && ^
+         docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
+      """
     }
+  }
+}
+
 
     stage('App URL') {
       steps {
