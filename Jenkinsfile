@@ -46,13 +46,13 @@ pipeline {
       }
     }
 
-    stage('Fetch EC2 IP') {
+    stage('Fetch EC2 DNS') {
       steps {
         dir('terraform') {
           script {
-            def ip = bat(script: 'terraform output -raw public_ip', returnStdout: true).trim()
-            echo "Fetched IP: ${ip}"
-            env.EC2_IP = ip
+            def dns = bat(script: 'terraform output -raw public_dns', returnStdout: true).trim()
+            echo "Fetched DNS: ${dns}"
+            env.EC2_DNS = dns
           }
         }
       }
@@ -62,21 +62,13 @@ pipeline {
       steps {
         dir('terraform') {
           script {
-            // Extract public IP to file
-            bat 'terraform output -raw public_ip > ec2_ip.txt'
+            echo "Deploying to EC2 at DNS: ${env.EC2_DNS}"
 
-            // Read public IP into a variable
-            def ec2Ip = readFile('ec2_ip.txt').trim()
-
-            // Log IP
-            echo "Deploying to EC2 at IP: ${ec2Ip}"
-
-            // Run SSH commands using secure permissions
             bat """
               icacls snippetstash-key.pem /inheritance:r
               icacls snippetstash-key.pem /grant:r "%USERNAME%:R"
 
-              ssh -o StrictHostKeyChecking=no -i "snippetstash-key.pem" ec2-user@${ec2Ip} ^
+              ssh -o StrictHostKeyChecking=no -i "snippetstash-key.pem" ubuntu@${env.EC2_DNS} ^
               "docker pull harshvashishth/snippetstash:latest && ^
                docker rm -f snippetstash_container || true && ^
                docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
@@ -86,12 +78,9 @@ pipeline {
       }
     }
 
-
-
-
     stage('App URL') {
       steps {
-        echo "Visit your app at: http://${env.EC2_IP}"
+        echo "Visit your app at: http://${env.EC2_DNS}"
       }
     }
   }
