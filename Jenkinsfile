@@ -50,10 +50,21 @@ pipeline {
             steps {
                 dir('terraform') {
                     script {
-                        def dns = bat(script: 'terraform output -raw public_dns', returnStdout: true).trim()
-                        def ip = bat(script: 'terraform output -raw public_ip', returnStdout: true).trim()
+                        // Get outputs and clean them properly
+                        def dnsOutput = bat(script: 'terraform output -raw public_dns', returnStdout: true)
+                        def ipOutput = bat(script: 'terraform output -raw public_ip', returnStdout: true)
+                        
+                        // Clean the outputs (remove command echoes and extra whitespace)
+                        def dns = dnsOutput.split('\n').findAll { it.contains('.amazonaws.com') }[0]?.trim()
+                        def ip = ipOutput.split('\n').findAll { it.matches(/^\d+\.\d+\.\d+\.\d+$/) }[0]?.trim()
+                        
                         echo "Fetched DNS: ${dns}"
                         echo "Fetched IP: ${ip}"
+                        
+                        if (!dns || !ip) {
+                            error "Failed to fetch valid DNS or IP from Terraform outputs"
+                        }
+                        
                         env.EC2_DNS = dns
                         env.EC2_IP = ip
                     }
@@ -71,28 +82,62 @@ pipeline {
                         echo "Deploying to DNS: ${dns}"
                         echo "Deploying to IP: ${ip}"
                         
-                        // Copy PEM file to workspace with proper permissions
-                        bat """
-                            copy "%PEM_FILE%" "%WORKSPACE%\\temp_key.pem"
-                            icacls "%WORKSPACE%\\temp_key.pem" /inheritance:r
-                            icacls "%WORKSPACE%\\temp_key.pem" /grant:r "%USERNAME%":(F)
+                        // Use PowerShell for better permission handling
+                        powershell """
+                            # Copy PEM file
+                            Copy-Item -Path "${env.PEM_FILE}" -Destination "${env.WORKSPACE}\\temp_key.pem" -Force
+                            
+                            # Set proper permissions using PowerShell
+                            \$pemFile = "${env.WORKSPACE}\\temp_key.pem"
+                            \$acl = Get-Acl \$pemFile
+                            \$acl.SetAccessRuleProtection(\$true, \$false)
+                            
+                            # Add permission for current user
+                            \$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+                            \$accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule(\$currentUser, "FullControl", "Allow")
+                            \$acl.SetAccessRule(\$accessRule)
+                            
+                            # Add permission for SYSTEM
+                            \$systemRule = New-Object System.Security.AccessControl.FileSystemAccessRule("SYSTEM", "FullControl", "Allow")
+                            \$acl.SetAccessRule(\$systemRule)
+                            
+                            Set-Acl -Path \$pemFile -AclObject \$acl
+                            
+                            Write-Host "PEM file permissions set successfully"
                         """
                         
-                        // Wait a bit for EC2 to be ready
+                        // Wait for EC2 to be ready
                         sleep(time: 30, unit: 'SECONDS')
                         
                         // Deploy using SSH
-                        bat """
-                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -o ConnectTimeout=30 -i "%WORKSPACE%\\temp_key.pem" ubuntu@${dns} "sudo docker pull ${env.DOCKERHUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} && sudo docker rm -f ${env.CONTAINER_NAME} || true && sudo docker run -d --name ${env.CONTAINER_NAME} -p 80:80 ${env.DOCKERHUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                        powershell """
+                            \$dns = "${dns}"
+                            \$pemFile = "${env.WORKSPACE}\\temp_key.pem"
+                            
+                            Write-Host "Deploying to: \$dns"
+                            
+                            # SSH command to deploy
+                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -o ConnectTimeout=30 -i \$pemFile ubuntu@\$dns "sudo docker pull ${env.DOCKERHUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG} && sudo docker rm -f ${env.CONTAINER_NAME} || true && sudo docker run -d --name ${env.CONTAINER_NAME} -p 80:80 ${env.DOCKERHUB_USER}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+                            
+                            if (\$LASTEXITCODE -eq 0) {
+                                Write-Host "Deployment command executed successfully"
+                                
+                                # Verify deployment
+                                ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -i \$pemFile ubuntu@\$dns "sudo docker ps | grep ${env.CONTAINER_NAME}"
+                                
+                                if (\$LASTEXITCODE -eq 0) {
+                                    Write-Host "Container is running successfully"
+                                } else {
+                                    Write-Host "Warning: Could not verify container status"
+                                }
+                            } else {
+                                Write-Host "Deployment failed with exit code: \$LASTEXITCODE"
+                                exit \$LASTEXITCODE
+                            }
+                            
+                            # Clean up
+                            Remove-Item -Path \$pemFile -Force -ErrorAction SilentlyContinue
                         """
-                        
-                        // Verify deployment
-                        bat """
-                            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL -i "%WORKSPACE%\\temp_key.pem" ubuntu@${dns} "sudo docker ps | grep ${env.CONTAINER_NAME}"
-                        """
-                        
-                        // Clean up temporary key file
-                        bat 'del "%WORKSPACE%\\temp_key.pem"'
                     }
                 }
             }
@@ -108,14 +153,8 @@ pipeline {
                         echo "🔗 IP:  http://${env.EC2_IP}"
                         echo ""
                         echo "⏰ Please wait 1-2 minutes for the application to fully start up."
-                        
-                        // Test connectivity
-                        bat """
-                            echo Testing connectivity to ${env.EC2_IP}...
-                            ping -n 4 ${env.EC2_IP} || echo "Ping failed, but this is normal for some EC2 instances"
-                        """
                     } else {
-                        error " EC2 DNS or IP not found. Deployment may have failed."
+                        error "❌ EC2 DNS or IP not found. Deployment may have failed."
                     }
                 }
             }
@@ -126,13 +165,13 @@ pipeline {
         always {
             script {
                 // Clean up any remaining temporary files
-                bat 'if exist "%WORKSPACE%\\temp_key.pem" del "%WORKSPACE%\\temp_key.pem"'
+                powershell 'Remove-Item -Path "${env.WORKSPACE}\\temp_key.pem" -Force -ErrorAction SilentlyContinue'
             }
         }
         success {
             echo '''
-                Pipeline completed successfully!
-                Your SnippetStash application is now live!
+                ✅ Pipeline completed successfully!
+                🚀 Your SnippetStash application is now live!
             '''
         }
         failure {
