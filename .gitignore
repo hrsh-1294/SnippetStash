@@ -33,5 +33,4 @@ dist-ssr
 *.pem
 *.key
 snippetstash-key.pem
-snippetstash-key.pub
 
