@@ -5,16 +5,35 @@ pipeline {
     IMAGE_NAME = "snippetstash"
     IMAGE_TAG = "latest"
     DOCKERHUB_USER = "harshvashishth"
-    AWS_ACCESS_KEY_ID = credentials('aws-access-key')
-    AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
     AWS_REGION = "ap-south-1"
     CONTAINER_NAME = "snippetstash_container"
   }
 
   stages {
-    stage('Clone GitHub Repo') {
+    stage('Terraform Init & Apply') {
       steps {
-        git branch: 'main', url: 'https://github.com/hrsh-1294/SnippetStash.git'
+        dir('terraform') {
+          withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-creds'
+          ]]) {
+            withEnv(["AWS_REGION=${env.AWS_REGION}"]) {
+              bat 'terraform init'
+              bat 'terraform apply -auto-approve'
+            }
+          }
+        }
+      }
+    }
+
+    stage('Fetch EC2 Public DNS & IP') {
+      steps {
+        script {
+          dir('terraform') {
+            env.EC2_PUBLIC_DNS = bat(script: 'terraform output -raw public_dns', returnStdout: true).trim()
+            env.EC2_PUBLIC_IP = bat(script: 'terraform output -raw public_ip', returnStdout: true).trim()
+          }
+        }
       }
     }
 
@@ -24,55 +43,26 @@ pipeline {
       }
     }
 
-    stage('Push to Docker Hub') {
+    stage('Push to DockerHub') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          bat '''
-            echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-            docker push %DOCKER_USER%/%IMAGE_NAME%:%IMAGE_TAG%
-          '''
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+          bat 'echo %DOCKER_PASSWORD% | docker login -u %DOCKER_USERNAME% --password-stdin'
+          bat 'docker push %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%'
         }
       }
     }
 
-    stage('Provision Infrastructure with Terraform') {
+    stage('Deploy to EC2 via SSH') {
       steps {
-        dir('terraform') {
-          bat '''
-            terraform init
-            terraform apply -auto-approve
-          '''
-        }
-      }
-    }
-
-    stage('Fetch EC2 DNS and IP') {
-      steps {
-        dir('terraform') {
-          script {
-            def dns = bat(script: 'terraform output -raw public_dns', returnStdout: true).trim()
-            def ip = bat(script: 'terraform output -raw public_ip', returnStdout: true).trim()
-            echo "Fetched DNS: ${dns}"
-            echo "Fetched IP: ${ip}"
-            env.EC2_DNS = dns
-            env.EC2_IP = ip
-          }
-        }
-      }
-    }
-
-    stage('Deploy App on EC2') {
-      steps {
-        withCredentials([file(credentialsId: 'snippetstash-key', variable: 'PEM_FILE')]) {
-          script {
-            def dns = env.EC2_DNS
-            def pem = env.PEM_FILE.replace('\\', '/') // Windows to Unix style
-            def sshCommand = """
-              ssh -o StrictHostKeyChecking=no -i "${pem}" ubuntu@${dns} "docker pull harshvashishth/snippetstash:latest && docker rm -f snippetstash_container || true && docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
+        script {
+          echo "Running SSH command to deploy on EC2..."
+          withCredentials([file(credentialsId: 'snippetstash-key', variable: 'PEM_FILE')]) {
+            bat """
+              ssh -o StrictHostKeyChecking=no -i "%PEM_FILE%" ubuntu@${env.EC2_PUBLIC_DNS} ^
+              "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
+              docker rm -f %CONTAINER_NAME% || true && ^
+              docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
             """
-
-            echo "Running SSH command to deploy on EC2..."
-            bat label: 'SSH to EC2', script: sshCommand
           }
         }
       }
@@ -80,17 +70,17 @@ pipeline {
 
     stage('App URL') {
       steps {
-        echo "Visit your deployed app at: http://${env.EC2_IP}"
+        echo "Visit your deployed app at: http://${env.EC2_PUBLIC_IP}"
       }
     }
   }
 
   post {
     success {
-      echo 'Pipeline completed successfully!'
+      echo "Pipeline completed successfully!"
     }
     failure {
-      echo 'Pipeline failed. Check above logs.'
+      echo "Pipeline failed. Check the logs above."
     }
   }
 }
