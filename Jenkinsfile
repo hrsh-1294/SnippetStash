@@ -9,7 +9,6 @@ pipeline {
     AWS_SECRET_ACCESS_KEY = credentials('aws-secret-key')
     AWS_REGION = "ap-south-1"
     CONTAINER_NAME = "snippetstash_container"
-    EC2_IP = ''
   }
 
   stages {
@@ -51,11 +50,9 @@ pipeline {
       steps {
         dir('terraform') {
           script {
-            env.EC2_IP = bat(
-              script: "terraform output -raw public_ip",
-              returnStdout: true
-            ).trim()
-            echo "EC2 IP fetched: ${env.EC2_IP}"
+            def ip = bat(script: 'terraform output -raw public_ip', returnStdout: true).trim()
+            echo "Fetched IP: ${ip}"
+            env.EC2_IP = ip
           }
         }
       }
@@ -65,10 +62,10 @@ pipeline {
       steps {
         sshagent(['ec2-ssh-key']) {
           bat """
-            ssh -o StrictHostKeyChecking=no ec2-user@${env.EC2_IP} ^
-              "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
-              docker rm -f %CONTAINER_NAME% || exit 0 && ^
-              docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
+            ssh -o StrictHostKeyChecking=no ec2-user@%EC2_IP% ^
+            "docker pull %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG% && ^
+            docker rm -f %CONTAINER_NAME% || exit 0 && ^
+            docker run -d --name %CONTAINER_NAME% -p 80:80 %DOCKERHUB_USER%/%IMAGE_NAME%:%IMAGE_TAG%"
           """
         }
       }
