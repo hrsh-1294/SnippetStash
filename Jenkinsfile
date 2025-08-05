@@ -52,7 +52,7 @@ pipeline {
         dir('terraform') {
           script {
             env.EC2_IP = bat(
-              script: "terraform output -raw ec2_ip",
+              script: "terraform output -raw public_ip",
               returnStdout: true
             ).trim()
             echo "EC2 IP fetched: ${env.EC2_IP}"
