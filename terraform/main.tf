@@ -57,6 +57,12 @@ resource "aws_instance" "snippetstash_server" {
 
   user_data = file("script.sh")
 
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    encrypted   = true
+  }
+
   tags = {
     Name = "snippetstash-server"
   }
