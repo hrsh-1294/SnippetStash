@@ -68,21 +68,24 @@ pipeline {
             // Read public IP into a variable
             def ec2Ip = readFile('ec2_ip.txt').trim()
 
-            // Log it for debugging
+            // Log IP
             echo "Deploying to EC2 at IP: ${ec2Ip}"
 
-            // Now SSH into EC2 and deploy
+            // Run SSH commands using secure permissions
             bat """
-              ssh -o StrictHostKeyChecking=no -i "C:/Users/harsh/OneDrive/Desktop/SnippetStash/terraform/snippetstash-key.pem" ec2-user@${ec2Ip} ^
+              icacls snippetstash-key.pem /inheritance:r
+              icacls snippetstash-key.pem /grant:r "%USERNAME%:R"
+
+              ssh -o StrictHostKeyChecking=no -i "snippetstash-key.pem" ec2-user@${ec2Ip} ^
               "docker pull harshvashishth/snippetstash:latest && ^
                docker rm -f snippetstash_container || true && ^
                docker run -d --name snippetstash_container -p 80:80 harshvashishth/snippetstash:latest"
             """
           }
         }
-        
       }
     }
+
 
 
 
