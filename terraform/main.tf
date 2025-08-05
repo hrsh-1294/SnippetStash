@@ -110,6 +110,11 @@ resource "aws_instance" "jenkins" {
   instance_type          = var.jenkins_instance_type
   key_name               = aws_key_pair.snippet_key.key_name
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  root_block_device {
+    volume_type = "gp3"
+    volume_size = 20
+    encrypted   = true
+  }
   user_data              = <<-EOF
               #!/bin/bash
               sudo apt update -y
