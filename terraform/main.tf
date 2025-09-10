@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_key_pair" "snippet_key" {
-  key_name   = "snippetstash-key"
+  key_name   = "jenkins-key-pair"
   public_key = file("C:/Users/harsh/OneDrive/Desktop/SnippetStash/terraform/jenkins-key-pair.pem")
 }
 
