@@ -48,102 +48,42 @@ data "aws_vpc" "default" {
 
 
 
-resource "aws_instance" "snippetstash_server" {
+resource "aws_instance" "jenkins-master" {
   ami                         = var.ami_id
   instance_type               = var.aws_ec2_instance_type
   vpc_security_group_ids      = [aws_security_group.snippet_sg.id]
   associate_public_ip_address = true
   key_name                    = aws_key_pair.snippet_key.key_name
 
-  user_data = file("script.sh")
+  user_data = file("jenkins-master-script.sh")
 
   root_block_device {
     volume_type = "gp3"
-    volume_size = 20
+    volume_size = 15
     encrypted   = true
   }
 
   tags = {
-    Name = "snippetstash-server"
+    Name = "jenkins-master"
   }
 }
 
-resource "aws_security_group" "jenkins_sg" {
-  name        = "jenkins-sg"
-  description = "Allow SSH and Jenkins ports"
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Jenkins UI"
-    from_port   = var.jenkins_port
-    to_port     = var.jenkins_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "HTTP (optional)"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-
-resource "aws_instance" "jenkins" {
+resource "aws_instance" "jenkins-agent" {
   ami                    = var.ami_id
   instance_type          = var.jenkins_instance_type
   key_name               = aws_key_pair.snippet_key.key_name
-  vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  vpc_security_group_ids = [aws_security_group.snippet_sg.id]
   root_block_device {
     volume_type = "gp3"
-    volume_size = 20
+    volume_size = 15
     encrypted   = true
   }
-  user_data              = <<-EOF
-              #!/bin/bash
-              sudo apt update -y
-              sudo apt install -y docker.io
-              sudo systemctl start docker
-              sudo systemctl enable docker
-              sudo usermod -aG docker ubuntu
 
-              sudo apt install fontconfig openjdk-21-jre -y
-              java -version
+  tags = {
+    Name = "jenkins-agent"
+  }
+  user_data = file("jenkins-agent-script.sh")
 
-              sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
-                https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-              echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
-                https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-              /etc/apt/sources.list.d/jenkins.list > /dev/null
-              sudo apt-get update
-              sudo apt-get install jenkins -y
-              sudo usermod -aG docker $USER
-              sudo usermod -aG docker jenkins && newgrp docker
-              
-              sudo systemctl restart docker
-              sudo systemctl restart jenkins
-
-
-              sudo systemctl status jenkins
-              sudo systemctl enable jenkins
-              sudo systemctl start jenkins
-              EOF
 
 }
 
