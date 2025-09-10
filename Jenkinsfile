@@ -1,6 +1,6 @@
 @Library('Shared-library') _
 pipeline {
-  agent {label "jenkins-agent"}
+  agent {label 'jenkins-agent'}
   
   stages {
     stage('Clone GitHub Repo') {
