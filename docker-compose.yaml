@@ -1,6 +1,5 @@
 services:
   web:
-    build:
-      image: harshvashishth/snippet-stash
+    image: harshvashishth/snippet-stash:latest
     ports:
       - "80:80"
