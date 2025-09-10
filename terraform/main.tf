@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_key_pair" "snippet_key" {
   key_name   = "snippetstash-key"
-  public_key = file("${path.module}/snippetstash-key.pub")
+  public_key = file("${path.module}/jenkins-key-pair.pem")
 }
 
 
