@@ -48,6 +48,60 @@ resource "aws_vpc_security_group_ingress_rule" "jenkins" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
+# SonarQube (9000)
+resource "aws_vpc_security_group_ingress_rule" "sonarqube" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 9000
+  to_port           = 9000
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# OWASP
+resource "aws_vpc_security_group_ingress_rule" "owasp" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 8081
+  to_port           = 8081
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# Prometheus (9090)
+resource "aws_vpc_security_group_ingress_rule" "prometheus" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 9090
+  to_port           = 9090
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# Grafana (3000)
+resource "aws_vpc_security_group_ingress_rule" "grafana" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 3000
+  to_port           = 3000
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# SMTP (25)
+resource "aws_vpc_security_group_ingress_rule" "smtp" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 25
+  to_port           = 25
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
+# SMTPS (465)
+resource "aws_vpc_security_group_ingress_rule" "smtps" {
+  security_group_id = aws_security_group.snippet_sg.id
+  from_port         = 465
+  to_port           = 465
+  ip_protocol       = "tcp"
+  cidr_ipv4         = "0.0.0.0/0"
+}
+
 # Allow all outbound traffic
 resource "aws_vpc_security_group_egress_rule" "all_outbound" {
   security_group_id = aws_security_group.snippet_sg.id

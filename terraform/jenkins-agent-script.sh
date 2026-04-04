@@ -4,12 +4,15 @@ sudo apt update -y
 sudo apt install -y fontconfig openjdk-21-jre
 java -version
 
-#install docker and give add user in docker group
+#install docker and give add user in docker group and create a docker network
 sudo apt-get update -y
 sudo apt-get install -y docker.io 
 sudo apt-get install docker-compose-v2
-sudo usermod -aG docker $USER && newgrp docker
+
+sudo usermod -aG docker ubuntu && newgrp docker
 sudo systemctl enable docker
 sudo systemctl start docker
+
+sudo docker network create test-net || true
 
 

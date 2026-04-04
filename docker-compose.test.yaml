@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  selenium-hub:
+    image: selenium/hub
+    ports:
+      - "4444:4444"
+    networks:
+      - test-net
+
+  chrome:
+    image: selenium/node-chrome
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    networks:
+      - test-net
+
+  tests:
+    image: maven:3.9.9-eclipse-temurin-21
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - selenium-hub
+      - chrome
+    networks:
+      - test-net
+    command: >
+      sh -c "
+      echo 'Waiting for Selenium...';
+      until curl -s http://selenium-hub:4444/wd/hub/status | grep ready; do
+        sleep 2;
+      done;
+      mvn clean test
+      "
+
+networks:
+  test-net:
+    external: true

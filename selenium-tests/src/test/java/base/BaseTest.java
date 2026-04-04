@@ -1,11 +1,12 @@
 package base;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeOptions;
-
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.*;
+import java.net.URL;
+
 
 import java.time.Duration;
 
@@ -15,17 +16,23 @@ public class BaseTest {
     protected WebDriverWait wait;
 
     @BeforeClass
-    public void setup() {
+    public void setup() throws Exception {
 
-        EdgeOptions options = new EdgeOptions();
-        options.addArguments("--headless");
+        ChromeOptions options = new ChromeOptions();
 
-        driver = new EdgeDriver(options);
-        driver.manage().window().maximize();
+        // Required for Docker / CI
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+
+        driver = new RemoteWebDriver(
+                new URL("http://selenium-hub:4444/wd/hub"),
+                options
+        );
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        driver.get("https://snippet-stash.vercel.app/");
+        driver.get("https://web");
     }
 
     @AfterClass
