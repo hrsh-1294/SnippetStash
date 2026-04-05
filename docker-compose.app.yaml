@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   web:
     image: harshvashishth/snippet-stash:latest
@@ -11,3 +9,4 @@ services:
 networks:
   app-net:
     name: app-net
+    external: true
