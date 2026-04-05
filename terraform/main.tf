@@ -78,8 +78,8 @@ resource "aws_vpc_security_group_ingress_rule" "prometheus" {
 # Grafana (3000)
 resource "aws_vpc_security_group_ingress_rule" "grafana" {
   security_group_id = aws_security_group.snippet_sg.id
-  from_port         = 3000
-  to_port           = 3000
+  from_port         = 3001
+  to_port           = 3001
   ip_protocol       = "tcp"
   cidr_ipv4         = "0.0.0.0/0"
 }

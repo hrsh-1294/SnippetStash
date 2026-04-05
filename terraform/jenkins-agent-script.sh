@@ -7,7 +7,7 @@ java -version
 #install docker and give add user in docker group and create a docker network
 sudo apt-get update -y
 sudo apt-get install -y docker.io 
-sudo apt-get install docker-compose-v2
+sudo apt install docker-compose
 
 sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
@@ -25,7 +25,7 @@ sudo apt-get install trivy -y
 #install git and clone repo
 sudo apt-get install -y git
 # Clone repo
-git clone https://github.com/hrsh-1294/SnippetStash.git
+sudo git clone https://github.com/hrsh-1294/SnippetStash.git
 cd SnippetStash
 
 # Start monitoring
