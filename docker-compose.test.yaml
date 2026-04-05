@@ -21,6 +21,7 @@ services:
 
   tests:
     image: maven:3.9.9-eclipse-temurin-21
+    user: "1000:1000"
     volumes:
       - ./selenium-tests:/app
     working_dir: /app
