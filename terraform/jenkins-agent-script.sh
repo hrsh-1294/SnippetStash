@@ -13,7 +13,6 @@ sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
 sudo systemctl start docker
 
-sudo docker network create test-net || true
 
 #install trivy
 sudo apt-get install wget apt-transport-https gnupg lsb-release -y
