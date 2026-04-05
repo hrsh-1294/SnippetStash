@@ -4,6 +4,7 @@ pipeline {
 
   environment {
     SONAR_HOME = tool "Sonar"
+    MAVEN_HOME = tool "Maven"
   }
 
   stages {
