@@ -26,7 +26,7 @@ public class BaseTest {
         options.addArguments("--disable-dev-shm-usage");
 
         driver = new RemoteWebDriver(
-        new URL("http://selenium-hub:4444/wd/hub"),  // ← Selenium Hub
+        new URL("http://selenium-hub:4444/wd/hub"),
         options
     );
 
