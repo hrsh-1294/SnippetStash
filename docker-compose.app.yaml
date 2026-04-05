@@ -6,8 +6,8 @@ services:
     ports:
       - "80:80"
     networks:
-      - test-net
+      - app-net
 
 networks:
-  test-net:
-    name: test-net
+  app-net:
+    name: app-net
