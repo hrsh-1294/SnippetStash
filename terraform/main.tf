@@ -86,7 +86,7 @@ resource "aws_vpc_security_group_ingress_rule" "grafana" {
 
 # cAdvisor
 resource "aws_vpc_security_group_ingress_rule" "cadvisor" {
-  security_group_id = aws_security_group.devops_sg.id
+  security_group_id = aws_security_group.snippet_sg.id
   cidr_ipv4         = "0.0.0.0/0"
   from_port         = 8082
   to_port           = 8082
