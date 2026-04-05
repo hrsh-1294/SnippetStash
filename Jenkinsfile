@@ -7,6 +7,10 @@ pipeline {
     MAVEN_HOME = tool "Maven"
   }
 
+  tools {
+    maven "Maven"
+  }
+
   stages {
 
     stage('Workspace Cleanup') {
