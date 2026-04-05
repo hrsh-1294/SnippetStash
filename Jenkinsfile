@@ -63,15 +63,30 @@ pipeline {
         }
     }
 
-    stage('Start Application') {
+    stage('Build Docker Image') {
       steps {
         script {
-          startApplication()
+          docker_build("snippet-stash","latest","harshvashishth")
         }
       }
     }
 
-    
+    stage('Push to Docker Hub') {
+      steps {
+        script {
+          docker_push("snippet-stash","latest","harshvashishth")
+        }
+      }
+    }
+
+    stage('Deploy the Application') {
+      steps {
+        script {
+          docker_compose_app()
+        }
+      }
+    }
+
     stage('Start Selenium Grid') {
       steps {
         script {
@@ -96,36 +111,5 @@ pipeline {
       }
     }
 
-    stage('Stop Application') {
-      steps {
-        script {
-          stopApplication()
-        }
-      }
-    }
-
-    stage('Build Docker Image') {
-      steps {
-        script {
-          docker_build("snippet-stash","latest","harshvashishth")
-        }
-      }
-    }
-
-    stage('Push to Docker Hub') {
-      steps {
-        script {
-          docker_push("snippet-stash","latest","harshvashishth")
-        }
-      }
-    }
-
-    stage('Deploy the Application') {
-      steps {
-        script {
-          docker_compose_app()
-        }
-      }
-    }
   }
 }
