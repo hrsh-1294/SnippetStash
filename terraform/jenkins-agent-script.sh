@@ -9,10 +9,26 @@ sudo apt-get update -y
 sudo apt-get install -y docker.io 
 sudo apt-get install docker-compose-v2
 
-sudo usermod -aG docker ubuntu && newgrp docker
+sudo usermod -aG docker ubuntu
 sudo systemctl enable docker
 sudo systemctl start docker
 
 sudo docker network create test-net || true
+
+#install trivy
+sudo apt-get install wget apt-transport-https gnupg lsb-release -y
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update -y
+sudo apt-get install trivy -y
+
+#install git and clone repo
+sudo apt-get install -y git
+# Clone repo
+git clone https://github.com/hrsh-1294/SnippetStash.git
+cd SnippetStash
+
+# Start monitoring
+docker-compose -f docker-compose.monitoring.yaml up -d
 
 

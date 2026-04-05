@@ -4,7 +4,7 @@ variable "region" {
 }
 
 variable "aws_ec2_instance_type" {
-  default = "t3.small"
+  default = "m7i-flex.large"
   type = string
 }
 
@@ -19,6 +19,6 @@ variable "jenkins_port" {
 }
 
 variable "jenkins_instance_type" {
-  default = "t3.small"
+  default = "m7i-flex.large"
   type    = string
 }
