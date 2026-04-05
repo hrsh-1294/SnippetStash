@@ -22,7 +22,7 @@ services:
   tests:
     image: maven:3.9.9-eclipse-temurin-21
     volumes:
-      - ./selenium-tests:/app        # ← mounts selenium-tests folder into container
+      - ./selenium-tests:/app
     working_dir: /app
     depends_on:
       - selenium-hub
@@ -32,8 +32,14 @@ services:
     command: >
       sh -c "
       echo 'Waiting for Selenium Grid...';
-      until curl -s http://selenium-hub:4444/wd/hub/status | grep -q '\"ready\":true'; do
+      i=0;
+      until curl -s http://selenium-hub:4444/wd/hub/status | grep -q 'ready'; do
         sleep 2;
+        i=\$((i+1));
+        if [ \$i -gt 30 ]; then
+          echo 'Timed out waiting for Selenium Grid!';
+          exit 1;
+        fi;
       done;
       echo 'Grid is ready. Running tests...';
       mvn clean test
