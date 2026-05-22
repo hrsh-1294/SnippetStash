@@ -9,7 +9,6 @@ pipeline {
 
   tools {
     maven "Maven"
-    sonar "Sonar"
   }
 
   stages {
