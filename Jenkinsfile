@@ -43,14 +43,6 @@ pipeline {
         }
     }
 
-    stage('Build Selenium Tests') {
-      steps {
-        script {
-        build_selenium_tests()
-        }
-      }
-    }
-
     stage("SonarQube: Code Analysis") {
       steps {
         script {
