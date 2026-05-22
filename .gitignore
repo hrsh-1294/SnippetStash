@@ -31,6 +31,6 @@ dist-ssr
 *.tfplan
 
 *.pem
-*.key
-
+*id_rsa*
+terra-key*
 
