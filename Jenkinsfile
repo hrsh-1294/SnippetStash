@@ -13,11 +13,11 @@ pipeline {
 
   stages {
 
-    stage('Workspace Cleanup') {
-      steps { 
-        cleanWs() 
-        }
-    }
+    // stage('Workspace Cleanup') {
+    //   steps { 
+    //     cleanWs() 
+    //     }
+    // }
 
     stage('Clone GitHub Repo') {
       steps {
