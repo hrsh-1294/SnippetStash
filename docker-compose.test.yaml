@@ -30,19 +30,26 @@ services:
       - chrome
     networks:
       - app-net
+
     command: >
       sh -c "
       echo 'Waiting for Selenium Grid...';
+
       i=0;
+
       until curl -s http://selenium-hub:4444/wd/hub/status | grep -q 'ready'; do
         sleep 2;
-        i=\$((i+1));
-        if [ \$i -gt 30 ]; then
+
+        i=$$((i+1));
+
+        if [ $$i -gt 30 ]; then
           echo 'Timed out waiting for Selenium Grid!';
           exit 1;
         fi;
       done;
+
       echo 'Grid is ready. Running tests...';
+
       mvn clean test
       "
 
